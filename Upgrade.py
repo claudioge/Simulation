@@ -8,6 +8,9 @@ inf_chance = 5
 Death_Prob = 1
 Grid_Size = 20
 
+mean_anti = -.5
+mean_neut = 0
+mean_pro = .5
 
 def GetRandList(low, high, size):
 
@@ -21,6 +24,19 @@ def GetRandList(low, high, size):
     return Rand
 
 
+def Gen_Op_List(pro,neutral,anti):
+    
+    list_op = []
+    for i in range(0,pro):
+        list_op.append(np.random.uniform(-1,-.33))
+    for i in range(0,neutral):
+        list_op.append(np.random.uniform(-.32,.33))
+    for i in range(0,anti):
+        list_op.append(np.random.uniform(.34, 1))
+
+    np.random.shuffle(list_op)
+    return list_op
+
 class Person():
 
     def __init__(self):
@@ -29,6 +45,7 @@ class Person():
         self.opinion = 0
         self.immunity = 60
         self.recovery_time = 10
+        self.Opinion = 0
 
     def CheckHealth(self):
 
@@ -52,6 +69,8 @@ class Town():
 
     def __init__(self):
 
+        init_op = Gen_Op_List(200,700,100)        
+
         self.grid = np.zeros((Grid_Size, Grid_Size))
         self.inhabitants = []
         self.location = []
@@ -67,6 +86,18 @@ class Town():
         Dict = {'Person': self.inhabitants,
             'Location': self.location, 'Status': self.Status}
         self.DF = pd.DataFrame(data=Dict)
+        
+        for person in self.inhabitants:
+            
+            person.Opinion = init_op.pop(0)
+            
+    def Op_Mean(self):
+        
+        Op = 0
+        for person in self.inhabitants:
+            Op += person.Opinion
+        
+        return Op/Population
 
     def Infect(self):
 
@@ -127,7 +158,7 @@ T.Infect()
 inf_tracker.append(T.Infected())
 imm_tracker.append(T.Immune())
 death_tracker.append(T.Death())
-for i in range(0, 500):
+for i in range(0, 4):
 
     T.Spread()
     T.Move()
@@ -135,9 +166,9 @@ for i in range(0, 500):
     imm_tracker.append(T.Immune())
     death_tracker.append(T.Death())
 
-plt.plot(np.arange(0, 501), inf_tracker, color='r')
-plt.plot(np.arange(0, 501), imm_tracker, color='b')
-plt.plot(np.arange(0, 501), death_tracker, color = 'y')
+plt.plot(np.arange(0, 5), inf_tracker, color='r')
+plt.plot(np.arange(0, 5), imm_tracker, color='b')
+plt.plot(np.arange(0, 5), death_tracker, color = 'y')
 end = time.time()
 
 print(end - start)
